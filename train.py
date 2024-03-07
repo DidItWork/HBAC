@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from .eval import test
+from .loss import 
 
 def train(model=None,
           train_dataset=None,
@@ -43,6 +44,14 @@ def train(model=None,
             for key in to_gpu_keys:
 
                 batch[key] = batch[key].cuda()
+
+            predictions = model(batch)
+
+            loss = loss_func(predictions)
+
+            loss.backward()
+
+            optimizer.step()
             
         
         #Test
