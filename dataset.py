@@ -1,14 +1,15 @@
 import torch
 from torch.utils.data import Dataset
 import pandas as pd
-from os import scandir, join
+from os import scandir
+from os.path import join
 import numpy as np
 from sklearn.model_selection import train_test_split
 
 class HMS_Dataset(Dataset):
 
     def __init__(self, 
-                 root_path : str = "/home/benluo/HBAC/data/hbac/",
+                 root_path : str = "/home/benluo/HBAC/data/hbac",
                  eval : bool = True,
                  test_size : float = 0.2) -> None:
 
@@ -46,7 +47,7 @@ class HMS_Dataset(Dataset):
             eeg_label_offset_seconds = row["eeg_label_offset_seconds"]
             spec_id = row["spectrogram_id"]
             spec_sub_id = row["spectrogram_sub_id"]
-            spec_label_offset_seconds = row["spectogram_label_offset_seconds"]
+            spec_label_offset_seconds = row["spectrogram_label_offset_seconds"]
             label_id = row["label_id"]
             patient_id = row["patient_id"]
             expert_consensus = row["expert_consensus"]
@@ -57,22 +58,23 @@ class HMS_Dataset(Dataset):
             grda_vote = row["grda_vote"]
             other_vote = row["other_vote"]
 
-            eeg = pd.read_parquet(join(self.data_root, "train_eeg/", eeg_id, ".parquet"))
-            spec = pd.read_parquet(join(self.data_root, "train_spectrograms/", spec_id, ".parquet"))
+            eeg = pd.read_parquet(join(self.data_root, "train_eegs/", str(eeg_id)+".parquet"))
+            spec = pd.read_parquet(join(self.data_root, "train_spectrograms/", str(spec_id)+".parquet"))
 
             #EEG Sub-sampling
-            start = eeg_label_offset_seconds*self.eeg_sample_freq
-            end = (eeg_label_offset_seconds+50)*self.eeg_sample_freq
-            eeg = eeg.iloc[start:end+1]
+            start = int(eeg_label_offset_seconds*self.eeg_sample_freq)
+            end = int((eeg_label_offset_seconds+50)*self.eeg_sample_freq)
+            eeg = eeg.iloc[start:end]
             eeg = np.array(eeg)
 
             #Spectrogram Sub-sampling
             start = int(spec_label_offset_seconds*self.spec_sample_freq)
             end = int((spec_label_offset_seconds+600)*self.spec_sample_freq)
-            spec = spec.iloc[start:end+1]
+            spec = spec.iloc[start:end]
             spec = np.array(spec)
 
-            label = np.array([seizure_vote, lpd_vote, gpd_vote, lrda_vote, grda_vote, other_vote])/np.sum(label)
+            label = np.array([seizure_vote, lpd_vote, gpd_vote, lrda_vote, grda_vote, other_vote])
+            label = label/np.sum(label)
 
             return eeg, spec, label
 
@@ -83,8 +85,8 @@ class HMS_Dataset(Dataset):
         spec_id = row["spectrogram_id"]
         patient_id = row["patient_id"]
         
-        eeg = pd.read_parquet(join(self.data_root, "test_eeg/", eeg_id, ".parquet"))
-        spec = pd.read_parquet(join(self.data_root, "test_spectrograms/", spec_id, ".parquet"))
+        eeg = pd.read_parquet(join(self.data_root, "test_eegs/", str(eeg_id)+".parquet"))
+        spec = pd.read_parquet(join(self.data_root, "test_spectrograms/", str(spec_id)+".parquet"))
     
         return eeg, spec
 
@@ -100,4 +102,8 @@ class HMS_Dataset(Dataset):
 
 if __name__ == "__main__":
 
-    train_set = HMS_Dataset()
+    data_set = HMS_Dataset()
+
+    for data in data_set:
+        print([d.shape for d in data])
+        break

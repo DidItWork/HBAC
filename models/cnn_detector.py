@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from networks import ResNet, 1DCNN
+from networks import ResNet
 
 class CNNDetector(nn.Module):
 
@@ -11,14 +11,16 @@ class CNNDetector(nn.Module):
 
         self.backbone_1d = None
 
-        self.backbone_2d = None
+        self.backbone_2d = ResNet(model_name="r18")
 
         self.head = None
 
-    def forward(self, x):
+    def forward(self, data_dict):
 
         """
         returns a dictionary pred_dict with the logits for loss calculation and gradient descent.
         """
 
-        pass
+        
+
+        return self.backbone_2d(data_dict["spec"])
