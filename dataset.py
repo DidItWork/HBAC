@@ -9,9 +9,10 @@ from sklearn.model_selection import train_test_split
 class HMS_Dataset(Dataset):
 
     def __init__(self, 
-                 root_path : str = "/home/benluo/HBAC/data/hbac",
+                 root_path : str = "./data/",
                  eval : bool = True,
-                 test_size : float = 0.2) -> None:
+                 test_size : float = 0.2,
+                 mode : bool = 0) -> None:
 
         super(HMS_Dataset, self).__init__()
 
@@ -27,7 +28,7 @@ class HMS_Dataset(Dataset):
         self.test_list = pd.read_csv(join(root_path, "test.csv"))
 
         #0 for training, 1 for validation, 2 for testing
-        self.mode = 0
+        self.mode = mode
 
         self.eeg_sample_freq = 200 # 200 Hz
         self.spec_sample_freq = 0.5 # 0.5 Hz
@@ -72,6 +73,14 @@ class HMS_Dataset(Dataset):
             end = int((spec_label_offset_seconds+600)*self.spec_sample_freq)
             spec = spec.iloc[start:end]
             spec = np.array(spec)
+
+            # zero mean, std norm
+            mean, std = spec.mean(), spec.std()
+            spec = (spec - mean) / std
+
+            # # min-max norm
+            # spec = (spec -np.min(spec))/(np.max(spec)-np.min(spec))
+            spec = np.expand_dims(spec, axis=0)
 
             label = np.array([seizure_vote, lpd_vote, gpd_vote, lrda_vote, grda_vote, other_vote])
             label = label/np.sum(label)
