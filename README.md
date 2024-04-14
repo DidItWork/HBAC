@@ -48,3 +48,6 @@ Example of training graphs are shown below
 
 | Model | Test KLDivLoss | Test Accuracy | Test F-1 Score |
 | --- | --- | --- | --- |
+| EfficientNet-b0 | | | |
+| EfficientNetV2 | | | |
+| Xception Net | | | |
