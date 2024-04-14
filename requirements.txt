@@ -1,2 +1,6 @@
 easydict
 pyarrow
+lightning
+tensorboard
+numpy
+pandas
