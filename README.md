@@ -36,4 +36,7 @@ Training can be monitored with Tensorboard using the following
 tensorboard --logdir <log directory>
 ```
 
+Example of training graphs are shown below
+
 ## Results
+
