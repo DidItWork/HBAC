@@ -4,3 +4,4 @@ lightning
 tensorboard
 numpy
 pandas
+ipykernel
