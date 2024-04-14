@@ -1,1 +1,2 @@
 from .cnn_detector import CNNDetector
+from .contrastive_detector import ContrastiveDetector
