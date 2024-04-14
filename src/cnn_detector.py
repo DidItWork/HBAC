@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision.models import efficientnet_b0, efficientnet_v2_s, convnext_tiny
+import torch.nn.functional as F
 
 class NaiveCNN(nn.Module):
     def __init__(self):
@@ -34,28 +35,18 @@ class NaiveCNN(nn.Module):
                                a=0, mode="fan_in", 
                                nonlinearity="relu") 
 
-        # self.output = nn.LogSoftmax(dim=0)
-
-    def forward(self, data_dict):
-        x = data_dict["spec"]
+    def forward(self, x):
         x = F.relu(self.conv1(x))
         x = self.batch_norm1(x)
         x = self.pool1(x)
-        
         x = F.relu(self.conv2(x))
         x = self.batch_norm2(x)
         x = self.pool2(x)
-        
-        # print(f'Shape before pool: {x.shape}')
         x = self.avg_pool(x)
-        # print(f'Shape after pool: {x.shape}')
-        
         x = self.flatten(x)
-        
         x = F.relu(self.fc1(x))
-    
+        x = self.drop1(x)
         x = self.fc2(x)
-        # x = self.output(x)
         return x
 
 class CNNDetector(nn.Module):
