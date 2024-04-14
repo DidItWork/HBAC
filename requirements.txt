@@ -5,3 +5,9 @@ tensorboard
 numpy
 pandas
 ipykernel
+sklearn
+tqdm
+albumentations
+matplotlib
+pickle
+torcheval

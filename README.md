@@ -27,7 +27,17 @@ pip install -r requirements.txt
 
 ## Dataset
 
-The HBAC dataset can be obtained from the HBAC Kaggle Website ([])
+The HBAC dataset can be obtained from the [HMS](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/data) Kaggle Website. Place the unzipped dataset in a data directory with the following structure:
+```
+.
+└── hbac
+    ├── example_figures
+    ├── models
+    ├── test_eegs
+    ├── test_spectrograms
+    ├── train_eegs
+    └── train_spectrograms
+```
 
 ## Training
 
