@@ -93,15 +93,17 @@ class CNNDetector(nn.Module):
         
 #         print(self.backbone_2d)
 
-        print(self.backbone_spec)
-
-        self.head = None
-
         self.output_layer = nn.Softmax(dim=1)
+        
+        print(self)
 
-    def get_loss(self, pred_dict):
+    def get_loss(self, predictions, labels):
 
-        pass
+        predictions = F.log_softmax(predictions, dim=1)
+
+        kl_loss = self.kl_loss(predictions, labels)
+
+        return kl_loss
 
     def forward(self, data_dict, inference=False):
 
