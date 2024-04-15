@@ -58,6 +58,8 @@ Example of training graphs are shown below
 
 ## Results
 
+Results of CNN architectures using only spectrogram data as well as the contrastive CNN architecture using both spectrogram and EEG data are shown below.
+
 | Model  | Test Accuracy | Test F-1 Score | Test KL-Loss |
 | --- | --- | --- | --- |
 | EfficientNet-b0 | 0.5962 | 0.6252 | 0.8949 |
