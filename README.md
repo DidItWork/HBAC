@@ -63,3 +63,4 @@ Example of training graphs are shown below
 | EfficientNet-b0 | 0.5962 | 0.6252 | 0.8949 |
 | EfficientNetV2 | 0.5972 | 0.6334 | 0.871 |
 | ConvNext | 0.6171 | 0.6441 | 0.9095 |
+| Contrastive | 0.6128 | 0.6411 | 0.8432 |
