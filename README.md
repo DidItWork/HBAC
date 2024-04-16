@@ -6,25 +6,33 @@
 
 Create python or conda environment
 ```
-conda create --name hbac_env
+conda create --name hbac_env python=3.9
 ```
 ```
 python -m venv hbac_env
 ```
 
-Install [pytorch](https://pytorch.org/)
+Activate environemtn
+```
+conda activate hbac_env
+```
+```
+source hbac_env/bin/activate
+```
+
+Install [pytorch 2.0.0](https://pytorch.org/get-started/previous-versions/)
 
 ```
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
 
 ```
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
 ```
 
 Install required packages
 ```
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Dataset

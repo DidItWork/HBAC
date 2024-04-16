@@ -5,9 +5,9 @@ tensorboard
 numpy
 pandas
 ipykernel
-sklearn
+ipywidgets
+scikit-learn
 tqdm
 albumentations
 matplotlib
-pickle
 torcheval
