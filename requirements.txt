@@ -11,3 +11,4 @@ tqdm
 albumentations
 matplotlib
 torcheval
+tensorflow
