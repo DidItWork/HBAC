@@ -6,6 +6,36 @@ import torch.nn.functional as F
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+class TemporalBlock(nn.Module):
+
+    def __init__(self, in_plane = 3,
+                 out_plane = 3,
+                 stride = 1,
+                 dilation = 1,
+                 kernel_size = 3,
+                 bias = False):
+        
+        super(TemporalBlock, self).__init__
+
+        assert stride > 0
+
+        self.conv = nn.Conv1d(in_plane, out_plane, stride=stride, dilation=dilation, kernel_size=kernel_size, bias=bias)
+
+        if stride > 1:
+            self.identity = nn.MaxPool1d(stride, stride=stride)
+        
+        self.norm_layer = nn.BatchNorm1d(out_plane)
+        
+    def forward(self, x):
+
+        x = self.conv(x) + self.identity(x)
+
+        x = self.norm_layer(x)
+
+        x = nn.ReLU(x)
+
+        return x
+        
 
 class ContrastiveDetector(nn.Module):
 
@@ -14,7 +44,7 @@ class ContrastiveDetector(nn.Module):
         super(ContrastiveDetector, self).__init__()
 
         model_name = config.get("model_name", "efficientnet_b0")
-        num_features = config.get("num_features", 512)
+        num_features = config.get("num_features", 256)
         num_classes = config.get("num_classes", 6)
 
         self.xf = torch.tensor([0.])
@@ -22,35 +52,24 @@ class ContrastiveDetector(nn.Module):
 
         self.kl_loss = nn.KLDivLoss(reduction="batchmean")
 
-        eeg_blocks = 3
+        eeg_blocks = 5
             
         #Strided Convolution
         module_list = nn.ModuleList([
-            nn.Conv1d(19, 64, stride=5, kernel_size=5, bias=False),
-            nn.BatchNorm1d(64),
+            nn.Conv1d(19, 128, stride=5, kernel_size=7, bias=False),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
-            nn.Conv1d(64, 128, stride=5, kernel_size=7, bias=False),
         ])
 
         for i in range(eeg_blocks):
 
-            module_list.append(nn.Sequential(
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Conv1d(128,128,stride=3,kernel_size=5,bias=False),
-                ))
-
-        module_list.append(nn.Sequential(
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Conv1d(128,256,stride=3,kernel_size=5,bias=False)
-        ))
+            module_list.append(TemporalBlock(128, 128, 3, 3, False))
         
-        module_list.append(nn.Sequential(
-            nn.BatchNorm1d(256),
+        module_list.append(
+            nn.Conv1d(128,num_features,stride=3,kernel_size=3,bias=False),
+            nn.BatchNorm1d(num_features),
             nn.ReLU(),
-            nn.Conv1d(256,num_features,stride=1,kernel_size=3,bias=False)
-        ))
+            )
 
         self.backbone_eeg = nn.Sequential(*module_list)
 
