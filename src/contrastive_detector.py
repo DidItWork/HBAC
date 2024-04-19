@@ -124,7 +124,7 @@ class ContrastiveDetector(nn.Module):
         kl_loss = self.kl_loss(predictions, labels) + self.kl_loss(eeg_predictions, labels) + self.kl_loss(spec_predictions, labels)
 
         if self.use_contrastive:
-            contrastive_loss = -torch.mean(nn.CosineSimilarity()(nn.Dropout(p=0.2)(self.xf), nn.Dropout(p=0.2)(self.x2f)))
+            contrastive_loss = -torch.mean(nn.CosineSimilarity()(self.xf, self.x2f))
         else:
             contrastive_loss = torch.tensor(0).to(device)
 
