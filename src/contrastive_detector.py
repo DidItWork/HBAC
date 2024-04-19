@@ -11,6 +11,7 @@ class TemporalBlock(nn.Module):
     def __init__(self, inplane = 3,
                  outplane = 3,
                  dilation = 1,
+                 stride = 1,
                  kernel_size = 3,
                  bias = False):
         
@@ -18,13 +19,43 @@ class TemporalBlock(nn.Module):
 
         assert dilation > 0
 
-        self.conv = nn.Conv1d(inplane, outplane, stride=1, padding="same", dilation=dilation, kernel_size=kernel_size, bias=bias)
+        if stride > 1:
+
+            self.conv = nn.Conv1d(inplane, outplane, stride=stride, dilation=dilation, kernel_size=kernel_size, bias=bias)
         
+        else:
+
+            self.conv = nn.Conv1d(inplane, outplane, stride=stride, padding="same", dilation=dilation, kernel_size=kernel_size, bias=bias)
+    
         self.norm_layer = nn.BatchNorm1d(outplane)
+
+        if stride==1:
+
+            if outplane!=inplane:
+                self.identity = nn.Sequential(
+                    nn.Conv1d(inplane, outplane, kernel_size=1, bias=bias),
+                    nn.BatchNorm1d(outplane)
+                )
+            else:
+                self.identity = nn.Identity()
+
+        else:
+
+            if outplane!=inplane:
+                self.identity = nn.Sequential(
+                    nn.Conv1d(inplane, outplane, kernel_size=1, bias=bias),
+                    nn.BatchNorm1d(outplane),
+                    nn.MaxPool1d(kernel_size=stride),
+                )
+            else:
+                self.identity = nn.Sequential(
+                    nn.Identity(),
+                    nn.MaxPool1d(kernel_size=stride),
+                )
         
     def forward(self, x):
 
-        x = self.norm_layer(self.conv(x)) + x
+        x = self.norm_layer(self.conv(x)) + self.identity(x)
 
         x = nn.ReLU()(x)
 
@@ -47,28 +78,26 @@ class ContrastiveDetector(nn.Module):
 
         self.kl_loss = nn.KLDivLoss(reduction="batchmean")
 
-        eeg_blocks = 6
+        planes = [64,128,128,256,256,256,256,num_features]
+
+        # strides = [1,1,1,1,1,1,1,1]
             
-        #Strided Convolution
+        #First convolution layer of EEG
         module_list = nn.ModuleList([
             nn.Conv1d(19, 64, stride=5, kernel_size=7, bias=False),
             nn.BatchNorm1d(64),
             nn.ReLU(),
-            nn.Conv1d(64, 128, kernel_size=3, bias=False),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
         ])
 
-        for i in range(eeg_blocks):
+        for i in range(1, len(planes)):
 
-            module_list.append(TemporalBlock(inplane=128, outplane=128, dilation=3**i, kernel_size=3, bias=False))
+            module_list.append(TemporalBlock(planes[i-1], planes[i], dilation=3**(i-1), kernel_size=3, stride=1, bias=False))
+
+        #final layer of EEG backbone
+        module_list.append(
+            nn.AvgPool1d(1999)
+        )
         
-        module_list.append(nn.Sequential(
-            nn.Conv1d(128,num_features,dilation=3**eeg_blocks,stride=3**eeg_blocks,kernel_size=3,bias=False),
-            nn.BatchNorm1d(num_features),
-            nn.ReLU(),
-            ))
-
         self.backbone_eeg = nn.Sequential(*module_list)
 
         if model_name == "convnext":
@@ -141,8 +170,6 @@ class ContrastiveDetector(nn.Module):
         x = self.backbone_spec(data_dict["spec"])
 
         x2 = self.backbone_eeg(data_dict["eeg"])
-
-        # print(x2.shape)
 
         x2 = nn.Flatten()(x2)
 
