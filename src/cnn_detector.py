@@ -12,20 +12,9 @@ class CNNDetector(nn.Module):
 
         model_name = config.get("model_name", "efficientnet_b0")
         num_classes = config.get("num_classes", 6)
-        use_eeg = config.get("use_eeg", False)
 
         self.kl_loss = nn.KLDivLoss(reduction="batchmean")
 
-        if use_eeg:
-            
-            #Strided Convolution
-            self.backbone_1d = nn.Sequential(
-                nn.conv2d(19, )
-            )
-
-        else:
-
-            self.backbone_1d = None
 
         if model_name == "convnext":
 
